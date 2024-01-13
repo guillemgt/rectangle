@@ -1,0 +1,37 @@
+#wordle-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    max-width: 325px;
+    margin: 20px auto;
+}
+
+#wordle-grid .cell {
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+    width: 70px;
+    height: 70px;
+    border: 2px solid #646464;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5em;
+    text-transform: uppercase;
+}
+
+#wordle-grid .cell:empty {
+    border: 2px solid #a8a8a8;
+    outline: none;
+}
+
+#wordle-grid .cell.start {
+    background-color: #2f7b28;
+    color: white;
+    border: none;
+}
+
+#wordle-grid .cell:focus {
+    background-color: rgb(255, 249, 194);
+    outline: none;
+}
