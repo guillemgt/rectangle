@@ -9,48 +9,68 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 });
 
+function stringToGrid(string){
+    let transpose = string.split('\n')
+    let grid = [];
+    for(let i = 0; i < transpose[0].length; i++){
+        grid[i] = [];
+    }
+    for(let j = 0; j < transpose.length; j++){
+        var column = transpose[j].split('');
+        for(let i = 0; i < column.length; i++){
+            grid[i][j] = column[i];
+        }
+    }
+    return grid;
+}
+
 function startGame(data){
     // Choose a random grid
-    let grid = data[parseInt(Math.random() * data.length)]
-        .split('\n');
-    
-    // Split the grid into a 2D array and transpose it
-    let game_grid = [];
+    let s = data[parseInt(Math.random() * data.length)];
+
+    let game_grid = stringToGrid(s["solution"]);
+
+    // Add hints
+    let hint_order = s["order"];
+    let pattern = s["solution"].split('\n');
+    let difficulty = 6;
     let start_grid = [];
-    for(let i = 0; i < grid[0].length; i++){
-        game_grid[i] = [];
-        start_grid[i] = [];
-    }
-    for(let j = 0; j < grid.length; j++){
-        var column = grid[j].split('');
-        for(let i = 0; i < column.length; i++){
-            game_grid[i][j] = column[i];
-            start_grid[i][j] = null;
+    for(let k = 0; k < difficulty; k++){
+        for(let i = 0; i < hint_order[0].length; i++){
+            start_grid[i] = [];
+            for(let j = 0; j < hint_order.length; j++){
+                if(hint_order[j][i] >= difficulty){
+                    start_grid[i][j] = game_grid[i][j];
+                    pattern[j][i] = '.';
+                }
+            }
         }
     }
 
-    let horizontal_hints = 3;
-    let vertical_hints = 2;
+    // Find all possible solutions
+    pattern = pattern.join('\n');
+    console.log(pattern)
+    let solutions = [];
+    for(let k=0; k<data.length; k++){
+        let words = data[k]["solution"];
 
-    // Add hints to the start grid
-    for(let k = 0; k < horizontal_hints; k++){
-        let i = parseInt(Math.random() * game_grid.length);
-        for(let j = 0; j < game_grid[i].length; j++){
-            start_grid[i][j] = game_grid[i][j];
+        // Check if words fits the pattern with regex
+        let regex = new RegExp(pattern, 'g');
+        let matches = words.match(regex);
+        if(matches != null){
+            solutions.push(stringToGrid(words).flat().join(""));
         }
     }
-    for(let k = 0; k < vertical_hints; k++){
-        let j = parseInt(Math.random() * game_grid[0].length);
-        for(let i = 0; i < game_grid.length; i++){
-            start_grid[i][j] = game_grid[i][j];
-        }
-    }
+
+    console.log(solutions)
 
     game_data = {
         width: game_grid[0].length,
         hight: game_grid.length,
         grid: game_grid,
         start_grid: start_grid,
+        solutions: solutions,
+        won: false
     }
     initializeGrid(game_data);
 
@@ -86,6 +106,7 @@ function initializeGrid(game_data) {
 }
 
 function focusCell(index) {
+    if(game_data.won) return;
     const cells = document.querySelectorAll('#wordle-grid .cell');
     let position = indexTo2D(index);
     console.log(position, game_data.start_grid[position[0]][position[1]])
@@ -140,6 +161,8 @@ let preemptive_index = null;
 const PREEMPTIVE_TYPING_TIME = 500;
 
 function handleKeydown(event, index) {
+    if(game_data.won) return;
+
     const key = event.key.toUpperCase();
     const cells = document.querySelectorAll('#wordle-grid .cell');
 
@@ -171,11 +194,51 @@ function handleKeydown(event, index) {
             moveFocus('right');
         }
         last_key = new Date().getTime();
+
+        // Check if the game is over
+        let a_cell_is_empty = false;
+        let solution_string = '';
+        for(let i = 0; i < cells.length; i++){
+            if(cells[i].textContent == ''){
+                a_cell_is_empty = true;
+                break;
+            }
+            solution_string += cells[i].textContent;
+        }
+
+        if(!a_cell_is_empty)
+            submitGuess(solution_string);
     }
 }
 
-function submitGuess() {
-    // Add logic to handle the guess
-    // Compare with the target word
-    // Update the grid with colors
+function submitGuess(string) {
+    string = string.toLowerCase();
+    // Check if string is in game_data.solutions
+    let solution_found = false;
+    for(let i = 0; i < game_data.solutions.length; i++){
+        if(string == game_data.solutions[i]){
+            solution_found = true;
+            break;
+        }
+    }
+
+    if(solution_found){
+        game_data.won = true;
+        document.querySelectorAll('#wordle-grid .cell').forEach((cell) => {
+            if(!cell.classList.contains('start'))
+                cell.classList.add('won');
+        });
+    } else {
+        shakeBoard();
+    }
+}
+
+
+function shakeBoard(){
+    // Shake #wordle-grid
+    let grid = document.getElementById('wordle-grid');
+    grid.classList.add('shake');
+    setTimeout(() => {
+        grid.classList.remove('shake');
+    }, 500);
 }
