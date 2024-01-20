@@ -114,13 +114,19 @@ def compute_entropy_for_position(args):
 def compute_score(string):
     grid = [[c for c in line] for line in string.split("\n")]
     score = 0
-    letters_to_remove = 20
+    letters_to_remove = len(grid) * len(grid[0])
     removed_positions = []
+
+    row_removals = [0 for _ in range(len(grid))]
+    col_removals = [0 for _ in range(len(grid[0]))]
 
     while letters_to_remove > 0:
         letters_to_remove -= 1
-        positions = [(i, j, grid) for i in range(len(grid)) for j in range(len(grid[i]))]
-
+        
+        positions = [(i, j, grid) for i in range(len(grid)) for j in range(len(grid[i])) if row_removals[i] == 1 or col_removals[j] == 1]
+        if len(positions) == 0:
+            positions = [(i, j, grid) for i in range(len(grid)) for j in range(len(grid[i]))]
+            
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(compute_entropy_for_position, positions)
 
@@ -130,6 +136,8 @@ def compute_score(string):
         if best_position:
             i, j = best_position
             grid[i][j] = "."
+            row_removals[i] += 1
+            col_removals[j] += 1
             score += best_entropy
             removed_positions.append(best_position)
 
@@ -141,7 +149,7 @@ def compute_score(string):
 
 for i in range(4, 10):
     for j in range(i, 10):
-        if i == j == 4:
+        if i == 4 and (j <= 5):
             continue
         key = str((i, j))
         pbar = tqdm(data[key])
@@ -164,9 +172,11 @@ for i in range(4, 10):
                 "difficulty": score
             })
             # print(grid)
+            
+        print("Found", len(new_data))
 
 new_data = sorted(new_data, key=lambda x: x["difficulty"], reverse=True)
 
-print("Found:", len(new_data))
+print("In total, found:", len(new_data))
 
 json.dump(new_data, open('games.json', 'w'), indent=1)
