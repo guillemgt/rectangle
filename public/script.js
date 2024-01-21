@@ -49,16 +49,32 @@ function stringToGrid(string){
     return grid;
 }
 
-function startGame(data){
+function findIndex(probability_map, p, start=0, end=null){
+    if(end == null)
+        end = probability_map.length;
+    if(end == start + 1)
+        return start;
+
+    half_index = parseInt((end+start)/2);
+    if(probability_map[half_index] > p){
+        return findIndex(probability_map, p, start, half_index);
+    }else{
+        return findIndex(probability_map, p, half_index, end);
+    }
+}
+
+function startGame(all_data){
+    let data = all_data["grids"];
+    let probability_map = all_data["probability_map"];
     // Choose a random grid
-    let s = data[parseInt(Math.random() * data.length)];
+    let game_index = findIndex(probability_map, Math.random());
+    let s = data[game_index];
 
     let game_grid = stringToGrid(s["solution"]);
 
     // Add hints
     let hint_order = s["order"];
     let pattern = s["solution"].split('\n');
-    console.log(hint_order)
     let difficulty = hint_order.length*hint_order[0].length/3;
     let start_grid = [];
     for(let k = 0; k < difficulty; k++){
@@ -75,7 +91,6 @@ function startGame(data){
 
     // Find all possible solutions
     pattern = pattern.join('\n');
-    console.log(pattern)
     let solutions = [];
     for(let k=0; k<data.length; k++){
         let words = data[k]["solution"];
@@ -87,8 +102,6 @@ function startGame(data){
             solutions.push(stringToGrid(words).flat().join(""));
         }
     }
-
-    console.log(solutions)
 
     game_data = {
         width: game_grid[0].length,
@@ -137,7 +150,6 @@ function focusCell(index) {
     if(game_data.won) return;
     const cells = document.querySelectorAll('#wordle-grid .cell');
     let position = indexTo2D(index);
-    console.log(position, game_data.start_grid[position[0]][position[1]])
     if(game_data.start_grid[position[0]][position[1]] != null)
         return;
     if (index >= 0 && index < cells.length) {
@@ -267,7 +279,6 @@ function checkGame(){
             continue;
         }
         if(!game_words.has(row_words[i].toLowerCase())){
-            console.log(row_words[i])
             lost = true;
             for(let j = 0; j < row_words[i].length; j++){
                 let cell = cells[i*game_data.width+j];

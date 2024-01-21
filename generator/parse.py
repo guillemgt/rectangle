@@ -2,6 +2,7 @@ import json
 import math
 import re
 from tqdm import tqdm
+from collections import Counter
 
 import concurrent.futures
 import functools
@@ -126,7 +127,7 @@ def compute_score(string):
         positions = [(i, j, grid) for i in range(len(grid)) for j in range(len(grid[i])) if row_removals[i] == 1 or col_removals[j] == 1]
         if len(positions) == 0:
             positions = [(i, j, grid) for i in range(len(grid)) for j in range(len(grid[i]))]
-            
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             results = executor.map(compute_entropy_for_position, positions)
 
@@ -147,10 +148,10 @@ def compute_score(string):
     return score, grid
 
 
-for i in range(4, 10):
+
+
+for i in range(5, 10):
     for j in range(i, 10):
-        if i == 4 and (j <= 5):
-            continue
         key = str((i, j))
         pbar = tqdm(data[key])
         pbar.set_description(key)
@@ -165,18 +166,58 @@ for i in range(4, 10):
                 if symmetric_fails < i-1:
                     continue
 
+            horizontal_words = el["grid"].split("\n")
+            vertical_words = ["".join([horizontal_words[i][j] for i in range(len(horizontal_words))]) for j in range(len(horizontal_words[0]))]
+            words = list(set(horizontal_words + vertical_words))
+
             score, grid = compute_score(el["grid"])
             new_data.append({
                 "solution": el["grid"],
                 "order": grid,
-                "difficulty": score
+                "difficulty": score,
+                "words": words,
+                "prob": 1.0
             })
-            # print(grid)
             
         print("Found", len(new_data))
 
-new_data = sorted(new_data, key=lambda x: x["difficulty"], reverse=True)
+
+# ==================================================================================================
+#  Compute probbability for each grid
+# ==================================================================================================
+
+word_appearances = Counter()
+for x in new_data:
+    for word in x["words"]:
+        word_appearances[word] += x["prob"]
+
+for x in new_data:
+    the_max = max(word_appearances[w] for w in x["words"])
+    x["prob"] = 1.0 / the_max
+
+total_prob = sum(x["prob"] for x in new_data)
+for x in new_data:
+    x["prob"] = x["prob"] / total_prob
+
+word_appearances = Counter()
+for x in new_data:
+    for word in x["words"]:
+        word_appearances[word] += x["prob"]
+
+# ==================================================================================================
+#  Structure the data
+# ==================================================================================================
+
+probability_map = []
+total_prob = 0.0
+
+for i, x in enumerate(new_data):
+    total_prob += x["prob"]
+    probability_map.append(total_prob)
+    del x["words"]
+    del x["difficulty"]
+    del x["prob"]
 
 print("In total, found:", len(new_data))
 
-json.dump(new_data, open('games.json', 'w'), indent=1)
+json.dump({"grids": new_data, "probability_map": probability_map}, open('games.json', 'w'))
