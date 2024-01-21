@@ -7,9 +7,35 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Rectanle</h1>
-    Fill in all the cells so that all rows and columns are words!
-    <div id="wordle-grid"></div>
-    <script src="script.js"></script>
+    <div id="intro">
+        <h1>Rectangle</h1>
+        <p>
+            Fill in all the cells so that all rows and columns are words!
+        </p>
+        <br/>
+        <button id="new-game">
+            Play
+        </button>
+    </div>
+    <div id="main" class="hidden">
+        <h1>Rectangle</h1>
+        <div id="timer">00:00</div>
+        <div id="wordle-grid"></div>
+    </div>
+    <dialog id="game-won">
+        <header>
+            <h1>Well done!</h1>
+            <div id="game-won-close">✕</div>
+        </header>
+        <scetion>
+            <p>
+                You finished the puzzle in <span id="game-won-time">99:99</span>!
+            </p>
+        </scetion>
+    </dialog>
+    <dialog id="help">
+
+    </dialog>
 </body>
+<script src="script.js"></script>
 </html>

@@ -1,10 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&family=Sanchez&display=swap');
+
+* {
+    font-family: 'Sanchez', serif;
+}
+
+body {
+    text-align: center;
+}
+.hidden {
+    display: none;
+}
+
+button {
+    color: #333;
+    padding: 8px 16px;
+    border: 2px solid #646464;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+#intro h1 {
+    font-size: 3em;
+    text-align: center;
+    color: #222;
+    margin: 50px 0 0 0;
+    padding: 0;
+
+    width: 100%;
+}
+
+#intro p {
+    font-size: 1.2em;
+    color: #555;
+    margin: 12px 0px;
+}
+
+#intro button {
+    font-size: 1.2em;
+    color: #555;
+    margin: 12px 0px;
+    padding: 8px 16px;
+    border: 2px solid #646464;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+#main h1 {
+    font-size: 3em;
+    text-align: center;
+    color: #222;
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    border-bottom: 1px solid #646464;
+}
+
+div#timer {
+    margin: 12px 0px;
+    font-size: 1.2em;
+    color: #555;
+    font-family: 'Courier Prime', monospace;
+}
 
 #wordle-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    max-width: 325px;
-    margin: 20px auto;
+    gap: 10px;
+    max-width: 305px;
+    margin: 0px auto;
 }
 
 #wordle-grid .cell {
@@ -39,16 +105,26 @@
 }
 
 #wordle-grid .cell:focus {
-    background-color: rgb(255, 249, 194);
+    background-color: rgb(251, 255, 210);
     outline: none;
+    border-color: rgb(151, 143, 1);
+}
+
+#wordle-grid .cell.wrong-row, #wordle-grid .cell.wrong-col {
+    color: rgb(201, 0, 0);
+    background-color: rgb(255, 202, 155);
+    border: 2px solid rgb(189, 0, 0);
+}
+
+#wordle-grid .cell.wrong-row.start, #wordle-grid .cell.start.wrong-col {
+    color: white;
+    background-color: rgb(201, 84, 0);
+    
 }
 
 #wordle-grid.shake {
     animation: shake 0.8s;
 }
-
-
-
 @keyframes shake {
     0%   { transform: translate( 6px, 0px); }
     10%  { transform: translate(-6px, 0px); }
@@ -61,4 +137,41 @@
     80%  { transform: translate( 6px, 0px); }
     90%  { transform: translate(-6px, 0px); }
     100% { transform: translate( 6px, 0px); }
+}
+
+dialog {
+    outline: none;
+}
+dialog::backdrop {
+    background: rgba(50, 50, 50, 0.5);
+    outline: none;
+}
+
+#game-won {
+    border-radius: 5px;
+    border: 2px solid #646464;
+}
+
+#game-won-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 4px;
+    line-height: 0px;
+    font-size: 1em;
+    border-radius: 4px;
+    color: #333;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#game-won-close:hover {
+    color: white;
+    background-color: #757575;
 }
