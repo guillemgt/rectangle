@@ -6,6 +6,7 @@
 
 body {
     text-align: center;
+    margin: 0;
 }
 .hidden {
     display: none;
@@ -71,6 +72,7 @@ div#timer {
     gap: 10px;
     max-width: 305px;
     margin: 0px auto;
+    padding: 5px;
 }
 
 #wordle-grid .cell {
@@ -104,8 +106,8 @@ div#timer {
     border: none;
 }
 
-#wordle-grid .cell:focus {
-    background-color: rgb(251, 255, 210);
+#wordle-grid .cell.focus {
+    background-color: rgb(251, 255, 210) !important;
     outline: none;
     border-color: rgb(151, 143, 1);
 }
@@ -126,17 +128,17 @@ div#timer {
     animation: shake 0.8s;
 }
 @keyframes shake {
-    0%   { transform: translate( 6px, 0px); }
-    10%  { transform: translate(-6px, 0px); }
-    20%  { transform: translate( 6px, 0px); }
-    30%  { transform: translate(-6px, 0px); }
-    40%  { transform: translate( 6px, 0px); }
-    50%  { transform: translate(-6px, 0px); }
-    60%  { transform: translate( 6px, 0px); }
-    70%  { transform: translate(-6px, 0px); }
-    80%  { transform: translate( 6px, 0px); }
-    90%  { transform: translate(-6px, 0px); }
-    100% { transform: translate( 6px, 0px); }
+    0%   { margin-left: 6px; }
+    10%  { margin-left: -6px; }
+    20%  { margin-left: 6px; }
+    30%  { margin-left: -6px; }
+    40%  { margin-left: 6px; }
+    50%  { margin-left: -6px; }
+    60%  { margin-left: 6px; }
+    70%  { margin-left: -6px; }
+    80%  { margin-left: 6px; }
+    90%  { margin-left: -6px; }
+    100% { margin-left: 6px; }
 }
 
 dialog {
@@ -175,3 +177,47 @@ dialog::backdrop {
     color: white;
     background-color: #757575;
 }
+
+/* Mobile devices */
+#wordle-grid {
+    margin: 0 auto;
+}
+
+#keyboard {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    padding: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+  
+#keyboard div {
+    display: flex;
+    gap: 5px;
+}
+
+.keyboard-second-row {
+    margin: 0.5rem 0;
+}
+
+.keyboard-button {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 10px 4px;
+    min-width: 40px;
+    cursor: pointer;
+    text-transform: uppercase;
+    background-color: #aaa;
+    border:none;
+}
+/* @media only screen and (max-width: 600px) {
+    #keyboard {
+        left: 0;
+    }
+} */
+

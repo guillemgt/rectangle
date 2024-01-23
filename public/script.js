@@ -28,10 +28,28 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('intro').classList.add('hidden');
         document.getElementById('main').classList.remove('hidden');
         startTimer();
+
+        adjustScale();
     });
     document.getElementById('game-won-close').addEventListener('click', () => {
         document.getElementById('game-won').close();
     });
+
+    document.querySelectorAll('#keyboard .keyboard-button').forEach((key_button) => {
+        key_button.addEventListener('click', () => {
+            let key = key_button.innerHTML.toUpperCase();
+            if(key == 'NEXT'){
+                key = 'ARROWRIGHT';
+            }else if(key == 'DEL'){
+                key = 'BACKSPACE';
+            }
+            handleKeydown(key);
+        });
+    });
+    window.addEventListener('keydown', (e) => handleKeydown(e.key.toUpperCase()));
+
+    // Adjust scale on window resize
+    window.addEventListener('resize', adjustScale);
 });
 
 function stringToGrid(string){
@@ -136,7 +154,6 @@ function initializeGrid(game_data) {
         cell.tabIndex = 0; // Make the cell focusable
         cell.addEventListener('mousedown', (e) => { e.preventDefault(); return false; });
         cell.addEventListener('click', (e) => { focusCell(i) });
-        cell.addEventListener('keydown', (e) => handleKeydown(e, i));
         let position = indexTo2D(i);
         if(game_data.start_grid[position[0]][position[1]] != null){
             cell.textContent = game_data.start_grid[position[0]][position[1]];
@@ -147,51 +164,66 @@ function initializeGrid(game_data) {
 }
 
 function focusCell(index) {
-    if(game_data.won) return;
     const cells = document.querySelectorAll('#wordle-grid .cell');
+    cells.forEach((cell) => { cell.classList.remove('focus'); });
+    if(game_data.won) return;
     let position = indexTo2D(index);
     if(game_data.start_grid[position[0]][position[1]] != null)
         return;
     if (index >= 0 && index < cells.length) {
-        cells[index].focus();
+        cells[index].classList.add('focus');
     }
 }
 
 function moveFocus(direction) {
     const cells = document.querySelectorAll('#wordle-grid .cell');
-    const current = document.activeElement;
-    let index = Array.from(cells).indexOf(current);
-    if (index >= 0) {
-        if (direction === 'left') {
-            if(index > 0)
-                preemptive_index = index - 1;
-            do {
-                index--;
-            } while(index > 0 && startGridAtIndex(index) != null);
-            focusCell(index);
-        } else if (direction === 'right') {
-            if(index < cells.length - 1)
-                preemptive_index = index + 1;
-            do {
-                index++;
-            } while(index < cells.length - 1 && startGridAtIndex(index) != null);
-            focusCell(index);
-        } else if (direction === 'up') {
-            if(index >= game_data.width)
-                preemptive_index = index - game_data.width;
-            do {
-                index -= game_data.width;
+    let index = Array.from(cells).indexOf(document.querySelector('#wordle-grid .focus'));
+    let tries = cells.length;
+    if (index < 0) {
+        focusCell(0);
+    } else if (direction === 'left') {
+        while(tries > 0){
+            index--;
+            if(index < 0)
+                index = cells.length - 1;
+            if(cells[index].textContent == ''){
+                focusCell(index);
+                break;
             }
-            while(index >= game_data.width && startGridAtIndex(index) != null);
-            focusCell(index);
-        } else if (direction === 'down') {
-            if(index < cells.length - game_data.width)
-                preemptive_index = index + game_data.width;
-            do {
-                index += game_data.width;
+            tries--;
+        }
+    } else if (direction === 'right') {
+        while(tries > 0){
+            index++;
+            if(index >= cells.length)
+                index = 0;
+            if(cells[index].textContent == ''){
+                focusCell(index);
+                break;
             }
-            while(index < cells.length - game_data.width && startGridAtIndex(index) != null);
-            focusCell(index);
+            tries--;
+        }
+    } else if (direction === 'up') {
+        while(tries > 0){
+            index -= game_data.width;
+            if(index < 0)
+                index += cells.length-1;
+            if(cells[index].textContent == ''){
+                focusCell(index);
+                break;
+            }
+            tries--;
+        }
+    } else if (direction === 'down') {
+        while(tries > 0){
+            index += game_data.width;
+            if(index >= cells.length)
+                index -= cells.length-1;
+            if(cells[index].textContent == ''){
+                focusCell(index);
+                break;
+            }
+            tries--;
         }
     }
 }
@@ -200,11 +232,13 @@ let last_key = new Date().getTime();
 let preemptive_index = null;
 const PREEMPTIVE_TYPING_TIME = 500;
 
-function handleKeydown(event, index) {
-    if(game_data.won) return;
-
-    const key = event.key.toUpperCase();
+function handleKeydown(key) {
     const cells = document.querySelectorAll('#wordle-grid .cell');
+    let index = Array.from(cells).indexOf(document.querySelector('#wordle-grid .focus'));
+    if(index < 0)
+        index = 0;
+
+    if(game_data.won) return;
 
     if (key === 'BACKSPACE') {
         if(new Date().getTime() - last_key < PREEMPTIVE_TYPING_TIME && startGridAtIndex(preemptive_index) != null){
@@ -219,23 +253,24 @@ function handleKeydown(event, index) {
         }
         last_key = new Date().getTime();
         checkGame();
-    } else if (key === 'ARROWRIGHT' && index < 29) {
+    } else if (key === 'ARROWRIGHT') {
         moveFocus('right');
-    } else if (key === 'ARROWLEFT' && index > 0) {
+    } else if (key === 'ARROWLEFT') {
         moveFocus('left');
-    } else if (key === 'ARROWUP' && index > 0) {
+    } else if (key === 'ARROWUP') {
         moveFocus('up');
-    } else if (key === 'ARROWDOWN' && index < 29) {
+    } else if (key === 'ARROWDOWN') {
         moveFocus('down');
     } else if (key.length === 1 && key >= 'A' && key <= 'Z') {
         if(new Date().getTime() - last_key < PREEMPTIVE_TYPING_TIME && startGridAtIndex(preemptive_index) != null){
             preemptive_index--;
         }else{
             cells[index].textContent = key;
-            moveFocus('right');
+            checkGame();
+            if(!cells[index].classList.contains('wrong-row') && !cells[index].classList.contains('wrong-col'))
+                moveFocus('right');
         }
         last_key = new Date().getTime();
-        checkGame();
     }
 }
 
@@ -311,9 +346,10 @@ function checkGame(){
 };
 
 function winGame(){
+    game_data.won = true;
     document.querySelectorAll('#wordle-grid .cell').forEach((cell) => {
         // Change cells to winning state
-        cell.blur();
+        cell.classList.remove('focus');
         if(!cell.classList.contains('start'))
             cell.classList.add('won');
 
@@ -351,4 +387,37 @@ function startTimer(){
 }
 function stopTimer(){
     clearInterval(the_timer);
+}
+
+function resizeToFitWidth(selector, max_width=600){
+    // const div = document.querySelector(selector);
+    // max_width = Math.min(max_width, window.innerWidth);
+    // let scale = max_width / window.innerWidth;
+    // div.style.transform = `scale(${scale})`;
+}
+
+function adjustScale() {
+    // return;
+    // resizeToFitWidth('html');
+
+    const flexItem1 = document.getElementById('keyboard');
+    const flexItem2 = document.getElementById('wordle-grid');
+
+
+    if (flexItem1.offsetWidth > window.outerWidth) {
+        // Calculate the scale factor
+        const scaleFactor = window.outerWidth / flexItem1.offsetWidth;
+
+        // Apply the scale factor to the flex items and font size
+        flexItem1.style.transform = `translateX(-50%) translateY(+50%) scale(${scaleFactor}) translateY(-50%)`;
+        flexItem2.style.transform = `translateX(-50%) translateY(-50%) scale(${scaleFactor}) translateY(+50%)`;
+        flexItem2.style.position = 'absolute';
+        flexItem2.style.left = '50%';
+    } else {
+        // Reset the scaling if everything fits
+        flexItem1.style.transform = 'translateX(-50%)';
+        flexItem2.style.transform = 'translateX(-50%)';
+        flexItem2.style.position = 'absolute';
+        flexItem2.style.left = '50%';
+    }
 }
