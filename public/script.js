@@ -35,6 +35,25 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('game-won').close();
     });
 
+    if(navigator.share){
+        document.getElementById('share-result').classList.remove('hidden');
+    }
+    document.getElementById('share-result').addEventListener('click', () => {
+        if(navigator.share){
+            let date = new Date();
+            let year = date.getFullYear();
+            let month = date.getMonth();
+            let day = date.getDate();
+            navigator.share({
+                title: 'Rectangle',
+                text: `On ${day}/${month+1}/${year} I filled in the Rectangle in ${document.getElementById('timer').innerText}!`,
+                url: 'https://tarr.ch/rectangle/'
+            })
+            .then(() => console.log('Successful share'))
+            .catch((error) => console.log('Error sharing', error));
+        }
+    });
+
     document.querySelectorAll('#keyboard .keyboard-button').forEach((key_button) => {
         key_button.addEventListener('click', () => {
             let key = key_button.innerHTML.toUpperCase();
@@ -51,6 +70,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Adjust scale on window resize
     window.addEventListener('resize', adjustScale);
 });
+
+
+function getUniformRandomPerDay(){
+    let date = new Date();
+    let year = date.getFullYear();
+    let month = date.getMonth();
+    let day = date.getDate();
+
+    let seed = (day*100+month)*10000+year;
+    for(let i=0; i<314; i++){
+        seed = (seed * 9301 + 49297) % 233281;
+    }
+    return seed / 233281;
+}
 
 function stringToGrid(string){
     let transpose = string.split('\n')
@@ -85,7 +118,8 @@ function startGame(all_data){
     let data = all_data["grids"];
     let probability_map = all_data["probability_map"];
     // Choose a random grid
-    let game_index = findIndex(probability_map, Math.random());
+    let uniform_random = getUniformRandomPerDay();
+    let game_index = findIndex(probability_map, uniform_random);
     let s = data[game_index];
 
     let game_grid = stringToGrid(s["solution"]);

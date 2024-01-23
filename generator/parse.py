@@ -163,12 +163,14 @@ for i in range(5, 10):
                     for k in range(l+1, i):
                         if grid[l][k] != grid[k][l]:
                             symmetric_fails += 1
-                if symmetric_fails < i-1:
+                if symmetric_fails < i:
                     continue
 
             horizontal_words = el["grid"].split("\n")
             vertical_words = ["".join([horizontal_words[i][j] for i in range(len(horizontal_words))]) for j in range(len(horizontal_words[0]))]
             words = list(set(horizontal_words + vertical_words))
+            if len(words) < len(horizontal_words) + len(vertical_words):
+                continue
 
             score, grid = compute_score(el["grid"])
             new_data.append({
