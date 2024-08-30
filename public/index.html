@@ -19,7 +19,10 @@
     </div>
     <div id="main" class="hidden">
         <h1>Rectangle</h1>
-        <div id="timer">00:00</div>
+        <div id="timer-container">
+            <div id="timer">00:00</div>
+            <button id="show-dialog-button" class="hidden" onclick="showWinDialog();">🎉</button>
+        </div>
         <div id="wordle-grid"></div>
         <div id="keyboard">
             <div class="keyboard-first-row">
@@ -60,7 +63,7 @@
     </div>
     <dialog id="game-won">
         <header>
-            <h1>Well done!</h1>
+            <h1>🥳 Well done! 🥳</h1>
             <div id="game-won-close">✕</div>
         </header>
         <section>

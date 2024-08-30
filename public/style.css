@@ -59,18 +59,23 @@ button {
     border-bottom: 1px solid #646464;
 }
 
-div#timer {
+div#timer-container {
     margin: 12px 0px;
     font-size: 1.2em;
     color: #555;
     font-family: 'Courier Prime', monospace;
+}
+div#timer {
+    display: inline-block;
+}
+button#show-dialog-button {
+    margin-left: 10px;
 }
 
 #wordle-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 10px;
-    max-width: 305px;
     margin: 0px auto;
     padding: 5px;
 }
@@ -143,10 +148,41 @@ div#timer {
 
 dialog {
     outline: none;
+
+	&[open] {
+		animation: open_size 0.2s forwards;
+	}
 }
+
 dialog::backdrop {
     background: rgba(50, 50, 50, 0.5);
     outline: none;
+    
+	&[open] {
+		animation: open 0.2s forwards;
+	}
+}
+
+
+
+@keyframes open_size {
+	from {
+		opacity: 0;
+		scale: 0;
+	}
+	to {
+		opacity: 1;
+		scale: 1;
+	}
+}
+
+@keyframes open {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 #game-won {
@@ -215,9 +251,3 @@ dialog::backdrop {
     background-color: #aaa;
     border:none;
 }
-/* @media only screen and (max-width: 600px) {
-    #keyboard {
-        left: 0;
-    }
-} */
-

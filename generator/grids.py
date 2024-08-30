@@ -4,6 +4,17 @@ from collections import Counter
 import json
 import math
 
+WORD_LIST_FILE = "data/words.txt"
+WORD_FREQ_FILE = "data/wordsFreq.json"
+FREQ_THRESHOLD = 200_000
+
+OUTPUT_WORD_LIST_FILE = "data/words_processed.txt"
+OUTPUT_GRID_FILE = "data/grids.json"
+
+#
+# "Efficient" grid search
+#
+
 class TrieNode:
     def __init__(self):
         self.children = {}
@@ -83,67 +94,70 @@ def fill_grid(hor_trie_grid: list[list[TrieNode]], ver_trie_grid: list[list[Trie
             yield from fill_grid(hor_trie_grid, ver_trie_grid, letter_grid, next_index)
 
 
+if __name__ == "__main__":
 
-word_frequencies = json.load(open('wordsFreq.json'))
+    # Load word frequencies
+    word_frequencies = json.load(open(WORD_FREQ_FILE, 'r'))
+    word_frequencies = {word: math.log10(freq) for word, freq in word_frequencies.items() if freq > FREQ_THRESHOLD}
 
-# Sort the words by frequency and print them
-# sorted_words = sorted(word_frequencies.items(), key=lambda x: x[1], reverse=True)
-# for word, freq in sorted_words:
-#     if freq > 100_000:
-#         print(word, freq)
-#         break
+    # Load word list
+    word_list = list(set(list(open(WORD_LIST_FILE, 'r', encoding='utf8').read().split('\n'))))
+    word_list = [w for w in word_list if len(w) > 0]
+    for _ in range(3):
+        words_list = [w[:-1] if w[-1] in ["^", "&", "^"] else w for w in word_list]
 
-word_frequencies = {word: math.log10(freq) for word, freq in word_frequencies.items() if freq > 0}
-word_list = list(set(list(open('words.txt', 'r', encoding='utf8').read().split('\n'))))
-print(len(word_list))
-word_list = [w for w in word_list if w in word_frequencies]
-word_frequencies = {word: word_frequencies[word] for word in word_list}
+    # Filter word list and word frequencies to the common words
+    word_list = [w for w in word_list if w in word_frequencies]
+    word_frequencies = {word: word_frequencies[word] for word in word_list}
 
-with open('words_processed.txt','w') as file:
-    file.write("\n".join(word_list))
-
-
-output = {}
-
-max_length = max(len(w) for w in word_list)
-
-length_to_words = [[] for i in range(max_length)]
-length_to_trie = [Trie() for i in range(max_length)]
-for i in range(max_length):
-    length_to_words[i] = [w for w in word_list if len(w) == i]
-    for word in length_to_words[i]:
-        length_to_trie[i].insert(word, word_frequencies[word])
+    with open(OUTPUT_WORD_LIST_FILE,'w') as file:
+        file.write("\n".join(word_list))
 
 
-for x in range(2, max_length):
-    for y in range(x, max_length):
-        print(x, y)
-        grid_size = (x, y)
-        tries = (length_to_trie[x], length_to_trie[y])
-        words = [length_to_words[x], length_to_words[y]]
+    # Search for all possible grids
+    # (some will not be in the game, for example if they are too small, or square and symmetric)
 
-        found_grids = []
+    output = {}
 
-        hor_trie_grid = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
-        for i in range(grid_size[0]):
-            hor_trie_grid[i][0] = tries[1].root
+    max_length = max(len(w) for w in word_list)
 
-        ver_trie_grid = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
-        for i in range(grid_size[1]):
-            ver_trie_grid[0][i] = tries[0].root
-        
-        letter_grid = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
+    length_to_words = [[] for i in range(max_length)]
+    length_to_trie = [Trie() for i in range(max_length)]
+    for i in range(max_length):
+        length_to_words[i] = [w for w in word_list if len(w) == i]
+        for word in length_to_words[i]:
+            length_to_trie[i].insert(word, word_frequencies[word])
 
-        for result in fill_grid(hor_trie_grid, ver_trie_grid, letter_grid, (0, 0)):
-            found_grids.append(result)
 
-        found_grids = sorted(found_grids, key=lambda x: x[0], reverse=True)
+    for x in range(2, max_length):
+        for y in range(x, max_length):
+            print(x, y)
+            grid_size = (x, y)
+            tries = (length_to_trie[x], length_to_trie[y])
+            words = [length_to_words[x], length_to_words[y]]
 
-        key = str((x, y))
-        output[key] = []
-        with open("grids.txt", "w") as f:
+            found_grids = []
+
+            hor_trie_grid = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
+            for i in range(grid_size[0]):
+                hor_trie_grid[i][0] = tries[1].root
+
+            ver_trie_grid = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
+            for i in range(grid_size[1]):
+                ver_trie_grid[0][i] = tries[0].root
+            
+            letter_grid = [[None for _ in range(grid_size[1])] for _ in range(grid_size[0])]
+
+            for result in fill_grid(hor_trie_grid, ver_trie_grid, letter_grid, (0, 0)):
+                found_grids.append(result)
+
+            found_grids = sorted(found_grids, key=lambda x: x[0], reverse=True)
+
+            key = str((x, y))
+            output[key] = []
+            print("->", len(found_grids))
             for freq, grid in found_grids:
                 output[key].append({'freq': freq, 'grid': grid})
 
 
-json.dump(output, open('grids.json', 'w'))
+    json.dump(output, open(OUTPUT_GRID_FILE, 'w'))

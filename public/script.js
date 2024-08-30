@@ -28,8 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('intro').classList.add('hidden');
         document.getElementById('main').classList.remove('hidden');
         startTimer();
-
+        
         adjustScale();
+        requestAnimationFrame(adjustScale);
     });
     document.getElementById('game-won-close').addEventListener('click', () => {
         document.getElementById('game-won').close();
@@ -46,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
             let day = date.getDate();
             navigator.share({
                 title: 'Rectangle',
-                text: `On ${day}/${month+1}/${year} I filled in the Rectangle in ${document.getElementById('timer').innerText}!`,
+                text: `I completed the ${day}/${month+1}/${year} Rectangle in ${document.getElementById('timer').innerText}!`,
                 url: 'https://tarr.ch/rectangle/'
             })
             .then(() => console.log('Successful share'))
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 function getUniformRandomPerDay(){
-    let date = new Date();
+    let date = new Date(); 
     let year = date.getFullYear();
     let month = date.getMonth();
     let day = date.getDate();
@@ -394,8 +395,16 @@ function winGame(){
 
         // Stop timer
         stopTimer();
+
+        // Show the share button
+        document.getElementById('show-dialog-button').classList.remove('hidden');
     });
 
+}
+
+function showWinDialog(){
+    let win_dialog = document.getElementById('game-won');
+    win_dialog.showModal();
 }
 
 function shakeBoard(){
@@ -436,22 +445,33 @@ function adjustScale() {
 
     const flexItem1 = document.getElementById('keyboard');
     const flexItem2 = document.getElementById('wordle-grid');
+    flexItem1.style.transform = 'translateX(-50%)';
+    flexItem2.style.transform = `translateX(-50%)`;
+    flexItem2.style.position = 'absolute';
+    flexItem2.style.left = '50%';
 
+    const window_width = document.documentElement.clientWidth;
+    const window_height = document.documentElement.clientHeight;
 
-    if (flexItem1.offsetWidth > window.outerWidth) {
-        // Calculate the scale factor
-        const scaleFactor = window.outerWidth / flexItem1.offsetWidth;
+    const keyboardScaleFactor = window_width / flexItem1.offsetWidth;
 
+    console.log(keyboardScaleFactor)
+
+    if (keyboardScaleFactor < 1) {
         // Apply the scale factor to the flex items and font size
-        flexItem1.style.transform = `translateX(-50%) translateY(+50%) scale(${scaleFactor}) translateY(-50%)`;
-        flexItem2.style.transform = `translateX(-50%) translateY(-50%) scale(${scaleFactor}) translateY(+50%)`;
-        flexItem2.style.position = 'absolute';
-        flexItem2.style.left = '50%';
-    } else {
-        // Reset the scaling if everything fits
-        flexItem1.style.transform = 'translateX(-50%)';
-        flexItem2.style.transform = 'translateX(-50%)';
-        flexItem2.style.position = 'absolute';
-        flexItem2.style.left = '50%';
+        flexItem1.style.transform = `translateX(-50%) translateY(+50%) scale(${keyboardScaleFactor}) translateY(-50%)`;
+    }
+
+    const maxHeightForWordleGrid = window_height - flexItem2.offsetTop - flexItem1.offsetHeight;
+    const gridScaleFactor = Math.min(
+        maxHeightForWordleGrid / flexItem2.offsetHeight,
+        window_width / flexItem2.offsetWidth,
+        keyboardScaleFactor
+    );
+
+    console.log(document.documentElement.clientHeight, flexItem2.offsetTop, flexItem1.offsetHeight, gridScaleFactor)
+
+    if(gridScaleFactor < 1){
+        flexItem2.style.transform = `translateX(-50%) translateY(-50%) scale(${gridScaleFactor}) translateY(+50%)`;
     }
 }
