@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime&family=Sanchez&display=swap');
+
+* {
+    font-family: 'Sanchez', serif;
+}
+
+body {
+    text-align: center;
+    margin: 0;
+}
+.hidden {
+    display: none;
+}
+
+button {
+    color: #333;
+    padding: 8px 16px;
+    border: 2px solid #646464;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+#intro h1 {
+    font-size: 3em;
+    text-align: center;
+    color: #222;
+    margin: 50px 0 0 0;
+    padding: 0;
+
+    width: 100%;
+}
+
+#intro p {
+    font-size: 1.2em;
+    color: #555;
+    margin: 12px 0px;
+}
+
+#intro button {
+    font-size: 1.2em;
+    color: #555;
+    margin: 12px 0px;
+    padding: 8px 16px;
+    border: 2px solid #646464;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+#main h1 {
+    font-size: 3em;
+    text-align: center;
+    color: #222;
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    border-bottom: 1px solid #646464;
+}
+
+div#timer-container {
+    margin: 12px 0px;
+    font-size: 1.2em;
+    color: #555;
+    font-family: 'Courier Prime', monospace;
+}
+div#timer {
+    display: inline-block;
+}
+button#show-dialog-button {
+    margin-left: 10px;
+}
+
+#wordle-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 0px auto;
+    padding: 5px;
+}
+
+#wordle-grid .cell {
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+    width: 70px;
+    height: 70px;
+    border: 2px solid #646464;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.5em;
+    text-transform: uppercase;
+}
+
+#wordle-grid .cell:empty {
+    border: 2px solid #a8a8a8;
+    outline: none;
+}
+
+#wordle-grid .cell.start {
+    background-color: #2f7b28;
+    color: white;
+    border: none;
+}
+
+#wordle-grid .cell.won {
+    background-color: #8dd187;
+    color: white;
+    border: none;
+}
+
+#wordle-grid .cell.focus {
+    background-color: rgb(251, 255, 210) !important;
+    outline: none;
+    border-color: rgb(151, 143, 1);
+}
+
+#wordle-grid .cell.wrong-row, #wordle-grid .cell.wrong-col {
+    color: rgb(201, 0, 0);
+    background-color: rgb(255, 202, 155);
+    border: 2px solid rgb(189, 0, 0);
+}
+
+#wordle-grid .cell.wrong-row.start, #wordle-grid .cell.start.wrong-col {
+    color: white;
+    background-color: rgb(201, 84, 0);
+    
+}
+
+#wordle-grid.shake {
+    animation: shake 0.8s;
+}
+@keyframes shake {
+    0%   { margin-left: 6px; }
+    10%  { margin-left: -6px; }
+    20%  { margin-left: 6px; }
+    30%  { margin-left: -6px; }
+    40%  { margin-left: 6px; }
+    50%  { margin-left: -6px; }
+    60%  { margin-left: 6px; }
+    70%  { margin-left: -6px; }
+    80%  { margin-left: 6px; }
+    90%  { margin-left: -6px; }
+    100% { margin-left: 6px; }
+}
+
+dialog {
+    outline: none;
+
+	&[open] {
+		animation: open_size 0.2s forwards;
+	}
+}
+
+dialog::backdrop {
+    background: rgba(50, 50, 50, 0.5);
+    outline: none;
+    
+	&[open] {
+		animation: open 0.2s forwards;
+	}
+}
+
+
+
+@keyframes open_size {
+	from {
+		opacity: 0;
+		scale: 0;
+	}
+	to {
+		opacity: 1;
+		scale: 1;
+	}
+}
+
+@keyframes open {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+#game-won {
+    border-radius: 5px;
+    border: 2px solid #646464;
+}
+
+#game-won-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 4px;
+    line-height: 0px;
+    font-size: 1em;
+    border-radius: 4px;
+    color: #333;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#game-won-close:hover {
+    color: white;
+    background-color: #757575;
+}
+
+/* Mobile devices */
+#wordle-grid {
+    margin: 0 auto;
+}
+
+#keyboard {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    padding: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+  
+#keyboard div {
+    display: flex;
+    gap: 5px;
+}
+
+.keyboard-second-row {
+    margin: 0.5rem 0;
+}
+
+.keyboard-button {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 10px 4px;
+    min-width: 40px;
+    cursor: pointer;
+    text-transform: uppercase;
+    background-color: #aaa;
+    border:none;
+}
