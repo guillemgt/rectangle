@@ -13,5 +13,5 @@ python parse.py
 ```
 (this will take a while to run, somewhere around 1-2h)
 
-Then, mode `generator/data/games.json` and `generator/data/words_processed.txt` to `public/`, and rename the latter to `words.txt`.
+Then, move `generator/data/games.msgpack.js` to `public/`.
 Run a webserver in that folder and you are set.

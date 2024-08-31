@@ -13,8 +13,11 @@
             Fill in all the cells so that all rows and columns are words!
         </p>
         <br/>
-        <button id="new-game">
-            Play
+        <div id="loading">
+            <div class="lds-dual-ring"></div>
+        </div>
+        <button id="new-game" class="hidden">
+            Play!
         </button>
     </div>
     <div id="main" class="hidden">
@@ -77,5 +80,7 @@
 
     </dialog>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+<script src="msgpack.min.js"></script> <!-- https://github.com/ygoe/msgpack.js -->
 <script src="script.js"></script>
 </html>
