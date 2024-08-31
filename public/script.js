@@ -1,27 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
-    fetch('words.txt')
-        .then(response => {
-            if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.text();
-        })
-        .then(text => {
-            // Split the text into lines
-            const lines = text.split(/\s/);
 
-            lines.forEach(line => {
-                game_words.add(line);
-            });
-        })
-    fetch('games.json')
-        .then(response => response.json())
-        .then(data => {
-            startGame(data);
-        })
-        .catch(error => {
-            console.error('Error fetching JSON:', error);
-        });
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadData();
 
     document.getElementById('new-game').addEventListener('click', () => {
         initializeGrid(game_data);
@@ -71,6 +51,31 @@ document.addEventListener("DOMContentLoaded", () => {
     // Adjust scale on window resize
     window.addEventListener('resize', adjustScale);
 });
+
+async function loadData(){
+    try {
+        const response = await fetch('games.msgpack.gz');
+        const arrayBuffer = await response.arrayBuffer();
+    
+        // Decompress the gzipped data using pako
+        const decompressedData = pako.ungzip(new Uint8Array(arrayBuffer));
+    
+        // Decode the MessagePack data
+        const data = msgpack.decode(decompressedData);
+    
+        // Set up the data
+        data["words"].forEach(word => {
+            game_words.add(word);
+        });
+        startGame(data);
+
+        // Show the play button
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('new-game').classList.remove('hidden');
+    } catch (error) {
+        console.error('Error fetching, decompressing, or decoding data:', error);
+    }
+}
 
 
 function getUniformRandomPerDay(){

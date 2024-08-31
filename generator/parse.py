@@ -6,6 +6,8 @@ from collections import Counter
 
 import concurrent.futures
 import functools
+import msgpack
+import gzip
 
 WORD_LIST_FILE = "data/words_processed.txt"
 WORD_FREQ_FILE = "data/wordsFreq.json"
@@ -180,4 +182,18 @@ if __name__ == "__main__":
 
     print("In total, found:", len(new_data))
 
-    json.dump({"grids": new_data, "probability_map": probability_map}, open(OUTPUT_GAMES_FILE, 'w'))
+    final_data = {
+        "grids": new_data,
+        "probability_map": probability_map,
+        "words": word_list
+    }
+
+    json.dump(final_data, open(OUTPUT_GAMES_FILE, 'w'))
+
+    packed_data = msgpack.packb(final_data)
+    with open(OUTPUT_GAMES_FILE.replace(".json", ".msgpack"), 'wb') as file:
+        file.write(packed_data)
+
+    compressed_data = gzip.compress(packed_data)
+    with open(OUTPUT_GAMES_FILE.replace(".json", ".msgpack.gz"), 'wb') as file:
+        file.write(compressed_data)
