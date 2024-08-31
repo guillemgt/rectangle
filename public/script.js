@@ -188,6 +188,7 @@ function initializeGrid(game_data) {
     const cell_size = 70;
     const cell_spacing = 10;
     grid.style['min-width'] = `${game_data.width*(cell_size+cell_spacing)-cell_spacing}px`;
+    let seen_free_cell = false;
     for (let i = 0; i < game_data.width*game_data.hight; i++) {
         let cell = document.createElement('div');
         cell.className = 'cell';
@@ -198,6 +199,11 @@ function initializeGrid(game_data) {
         if(game_data.start_grid[position[0]][position[1]] != null){
             cell.textContent = game_data.start_grid[position[0]][position[1]];
             cell.classList.add('start');
+        }else{
+            if(!seen_free_cell){
+                seen_free_cell = true;
+                cell.classList.add('focus');
+            }
         }
         grid.appendChild(cell);
     }
@@ -205,6 +211,8 @@ function initializeGrid(game_data) {
 
 function focusCell(index) {
     const cells = document.querySelectorAll('#wordle-grid .cell');
+    if(cells[index].classList.contains('start'))
+        return;
     cells.forEach((cell) => { cell.classList.remove('focus'); });
     if(game_data.won) return;
     let position = indexTo2D(index);
@@ -277,14 +285,19 @@ function handleKeydown(key) {
     let index = Array.from(cells).indexOf(document.querySelector('#wordle-grid .focus'));
     if(index < 0)
         index = 0;
+    while(cells[index].classList.contains('start')){
+        index++;
+        if(index >= cells.length)
+            index = 0;
+    }
+
 
     if(game_data.won) return;
-
     if (key === 'BACKSPACE') {
         if(new Date().getTime() - last_key < PREEMPTIVE_TYPING_TIME && startGridAtIndex(preemptive_index) != null){
             preemptive_index--;
         }else{
-            if(cells[index].textContent == '' && index > 0){
+            if(cells[index].textContent == '' && index > 0 && !cells[index-1].classList.contains('start')){
                 cells[index-1].textContent = '';
                 moveFocus('left');
             }else{
